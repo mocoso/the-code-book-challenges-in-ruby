@@ -1,12 +1,31 @@
 require_relative './language'
+require_relative './caesar_cipher'
+require_relative './substitution_cipher'
+
 require 'fibonacci_heap'
 
 module CipherCracker
-  def self.decode_file(file_path:, word_hash:)
-    decode(cipher_text: File.read(file_path), word_hash: word_hash)
+  def self.decode_file(file_path:, word_hash:, type:)
+    decode(cipher_text: File.read(file_path), word_hash: word_hash, type: type)
   end
 
-  def self.decode(cipher_text:, word_hash:)
+  def self.decode(cipher_text:, word_hash:, type:)
+    case type
+    when :substitution
+       key = substitution_cipher_key_finder(cipher_text: cipher_text, word_hash: word_hash)
+       plain_text = SubstitutionCipher.decode(key: key, cipher_text: cipher_text)
+    when :caesar
+       key = caesar_cipher_key_finder(cipher_text: cipher_text, word_hash: word_hash)
+       plain_text = CaesarCipher.decode(key: key, cipher_text: cipher_text)
+    else
+      raise 'Unrecognised type'
+    end
+
+    puts "\n\nDecoded:\n" + plain_text
+    puts "\nNumber of words matched: " + Language.number_of_matching_words(text: plain_text, word_hash: word_hash).to_s
+  end
+
+  def self.substitution_cipher_key_finder(cipher_text:, word_hash:)
     partial_keys_heap = FibonacciHeap::Heap.new
     partial_keys_heap.insert(FibonacciHeap::Node.new(0, {}))
     keys_heap = FibonacciHeap::Heap.new
@@ -38,11 +57,15 @@ module CipherCracker
       end
     end
 
-    best_key_node = keys_heap.pop
-    plain_text = SubstitutionCipher.decode(key: best_key_node.value, cipher_text: cipher_text)
+    keys_heap.pop.value
+  end
 
-    puts "\n\nDecoded:\n" + plain_text
-    puts "\nNumber of words matched: " + Language.number_of_matching_words(text: plain_text, word_hash: word_hash).to_s
+  def self.caesar_cipher_key_finder(cipher_text:, word_hash:)
+    (1..25).to_a.max do |key|
+      Language.number_of_matching_words(
+        text: CaesarCipher.decode(key: key, cipher_text: cipher_text),
+        word_hash: word_hash)
+    end
   end
 
   def self.coded_letters_in_freqency_order(cipher_text:)
