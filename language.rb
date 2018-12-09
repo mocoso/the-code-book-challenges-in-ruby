@@ -1,6 +1,6 @@
 module Language
   def self.english_word_hash
-    @english ||= word_hash_from_file(file_path: '/usr/share/dict/words')
+    @english ||= word_hash_from_file(file_path: '/data/english-words.txt')
   end
 
   def self.word_hash_from_file(file_path:)
