@@ -3,6 +3,10 @@ module Language
     @english ||= word_hash_from_file(file_path: '/data/english-words.txt')
   end
 
+  def self.latin_word_hash
+    @@latin ||= word_hash_from_file(file_path: '../data/latin-words.txt')
+  end
+
   def self.word_hash_from_file(file_path:)
     word_dict = Hash.new
 

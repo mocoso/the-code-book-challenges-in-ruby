@@ -5,23 +5,25 @@ describe CipherCracker do
   let(:partial_key) { { 'A' => 'd', 'B' => 'o', 'C' => 'g' } }
 
   describe 'partial_key_score' do
+    let(:word_hash) { { 'dog' => true, 'god' => true, 'gut' => true, 'cab' => true } }
+
     specify 'all words are deciphered and match english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC CBA')).
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC CBA', word_hash: word_hash)).
         to eq(8)
     end
 
     specify '2 words are deciphered and 2 could match english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CXZ CBA')).
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CXZ CBA', word_hash: word_hash)).
         to eq(10)
     end
 
     specify '2 words are deciphered words and 1 could match an english  word and the other not' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CCZ CBA')).
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CCZ CBA', word_hash: word_hash)).
         to eq(9)
     end
 
     specify 'all words are deciphered and none are english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ACB CAB')).
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ACB CAB', word_hash: word_hash)).
         to eq(0)
     end
   end

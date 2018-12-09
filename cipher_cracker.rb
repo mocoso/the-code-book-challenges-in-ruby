@@ -2,11 +2,11 @@ require_relative './language'
 require 'fibonacci_heap'
 
 module CipherCracker
-  def self.decode_file(file_path:)
-    decode(cipher_text: File.read(file_path))
+  def self.decode_file(file_path:, word_hash:)
+    decode(cipher_text: File.read(file_path), word_hash: word_hash)
   end
 
-  def self.decode(cipher_text:)
+  def self.decode(cipher_text:, word_hash:)
     partial_keys_heap = FibonacciHeap::Heap.new
     partial_keys_heap.insert(FibonacciHeap::Node.new(0, {}))
     keys_heap = FibonacciHeap::Heap.new
@@ -22,7 +22,7 @@ module CipherCracker
       if letter
         generate_possible_next_keys(partial_key: partial_key, next_coded_letter: letter).each do |key|
           node = FibonacciHeap::Node.new(
-            -partial_key_score(partial_key: key, cipher_text: cipher_text),
+            -partial_key_score(partial_key: key, cipher_text: cipher_text, word_hash: word_hash),
             key
           )
 
@@ -42,7 +42,7 @@ module CipherCracker
     plain_text = SubstitutionCipher.decode(key: best_key_node.value, cipher_text: cipher_text)
 
     puts "\n\nDecoded:\n" + plain_text
-    puts "\nNumber of words matched: " + Language.number_of_matching_words(text: plain_text, word_hash: Language.english_word_hash).to_s
+    puts "\nNumber of words matched: " + Language.number_of_matching_words(text: plain_text, word_hash: word_hash).to_s
   end
 
   def self.coded_letters_in_freqency_order(cipher_text:)
@@ -72,7 +72,7 @@ module CipherCracker
     end
   end
 
-  def self.partial_key_score(partial_key:, cipher_text:)
+  def self.partial_key_score(partial_key:, cipher_text:, word_hash:)
     partial_decipher = SubstitutionCipher.decode(key: partial_key, cipher_text: cipher_text)
 
     word_blocks = Language.split_into_words(text: partial_decipher)
@@ -81,14 +81,14 @@ module CipherCracker
       if text_is_fully_ciphered?(text: word_block)
         1
       elsif text_is_fully_deciphered?(text: word_block)
-        if Language.is_word?(word: word_block, word_hash: Language.english_word_hash)
+        if Language.is_word?(word: word_block, word_hash: word_hash)
           4
         else
           0
         end
       else
         regex = matcher_for_partially_deciphered_word(partial_key: partial_key, word: word_block)
-        Language.match_word?(regex: regex, word_hash: Language.english_word_hash) ? 1 : 0
+        Language.match_word?(regex: regex, word_hash: word_hash) ? 1 : 0
       end
     }
 
