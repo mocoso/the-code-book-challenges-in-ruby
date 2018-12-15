@@ -10,6 +10,8 @@ module CipherCracker
   end
 
   def self.decode(cipher_text:, word_hash:, type:)
+    start_time = Time.now
+
     case type
     when :substitution
        key = substitution_cipher_key_finder(cipher_text: cipher_text, word_hash: word_hash)
@@ -21,6 +23,7 @@ module CipherCracker
       raise 'Unrecognised type'
     end
 
+    puts "\n\nTime taken: #{Time.now - start_time}secs"
     puts "\n\nDecoded:\n" + plain_text
     puts "\nNumber of words matched: " + Language.number_of_matching_words(text: plain_text, word_hash: word_hash).to_s
   end
