@@ -105,16 +105,16 @@ module CipherCracker
 
     score = word_blocks.sum { |word_block|
       if text_is_fully_ciphered?(text: word_block)
-        1
+        0
       elsif text_is_fully_deciphered?(text: word_block)
         if Language.is_word?(word: word_block, word_hash: word_hash)
-          4
+          1
         else
-          0
+          -1
         end
       else
         regex = matcher_for_partially_deciphered_word(partial_key: partial_key, word: word_block)
-        Language.match_word?(regex: regex, word_hash: word_hash) ? 1 : 0
+        Language.match_word?(regex: regex, word_hash: word_hash) ? 0 : -1
       end
     }
 

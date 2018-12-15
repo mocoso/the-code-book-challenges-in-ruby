@@ -5,25 +5,30 @@ describe CipherCracker do
   let(:partial_key) { { 'A' => 'd', 'B' => 'o', 'C' => 'g' } }
 
   describe 'partial_key_score' do
-    let(:word_hash) { { 'dog' => true, 'god' => true, 'gut' => true, 'cab' => true } }
+    let(:word_hash) { { 'dog' => true, 'god' => true, 'gut' => true, 'cab' => true, 'gob' => true  } }
 
-    specify 'all words are deciphered and match english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC CBA', word_hash: word_hash)).
-        to eq(8)
+    specify 'word is a dictionary word' do
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC', word_hash: word_hash)).
+        to eq(1)
     end
 
-    specify '2 words are deciphered and 2 could match english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CXZ CBA', word_hash: word_hash)).
-        to eq(10)
+    specify 'word is not a dictionary word' do
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ACB', word_hash: word_hash)).
+        to eq(-1)
     end
 
-    specify '2 words are deciphered words and 1 could match an english  word and the other not' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ABC XYZ CCZ CBA', word_hash: word_hash)).
-        to eq(9)
+    specify 'word is partially deciphered and could match a dictionary word' do
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'CBZ', word_hash: word_hash)).
+        to eq(0)
     end
 
-    specify 'all words are deciphered and none are english words' do
-      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'ACB CAB', word_hash: word_hash)).
+    specify 'word is partically deciphered and could not match adictionary word' do
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'AAZ', word_hash: word_hash)).
+        to eq(-1)
+    end
+
+    specify 'word is not deciphered at all' do
+      expect(subject.partial_key_score(partial_key: partial_key, cipher_text: 'XYZ', word_hash: word_hash)).
         to eq(0)
     end
   end
